@@ -62,30 +62,31 @@ private[untyped] final class WalletAggregate(id: WalletId, requestsLimit: Int) e
         )
       )
 
-    case m @ PayRequest(_, walletId, money, requestId, instant)
-        if walletId == id && requestId.fold(true)(requests.contains) =>
+    case m @ PayRequest(_, walletId, toWalletId, money, requestId, instant)
+        if walletId == id && requestId.fold(true)(requests.map(_.requestId).contains) =>
       log.debug(s"message = $m")
       val currentBalance = getWallet(maybeWallet).balance
       if (currentBalance.sub(money) < Balance.zero)
         sender() ! PayFailed("Can not trade because the balance after trading is less than 0")
       else
         sender() ! PaySucceeded
-      fireEvent(subscribers)(WalletPayed(walletId, money, requestId, instant))
+
       context.become(
         onMessage(
-          maybeWallet.map(_.withBalance(currentBalance.sub(money))),
+          maybeWallet.map(_.subBalance(money)),
           requests.filterNot(requestId.contains),
           subscribers
         )
       )
+      fireEvent(subscribers)(WalletPayed(walletId, toWalletId, money, requestId, instant))
 
-    case rr @ RequestRequest(_, requestId, walletId, money, instant) if walletId == id =>
+    case rr @ RequestRequest(_, requestId, walletId, toWalletId, money, instant) if walletId == id =>
       log.debug(s"message = $rr")
       if (requests.size > requestsLimit)
         sender() ! RequestFailed("Limit over")
       else
         sender() ! RequestSucceeded
-      fireEvent(subscribers)(WalletRequested(requestId, walletId, money, instant))
+      fireEvent(subscribers)(WalletRequested(requestId, walletId, toWalletId, money, instant))
       context.become(
         onMessage(
           maybeWallet,

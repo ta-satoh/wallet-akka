@@ -50,7 +50,7 @@ class WalletAggregatesSpec extends AkkaSpec {
 
       val requestId = newULID
       val money     = Money(BigDecimal(100))
-      walletRef ! RequestRequest(newULID, requestId, walletId, money, Instant.now)
+      walletRef ! RequestRequest(newULID, requestId, walletId, newULID, money, Instant.now)
       expectMsg(RequestSucceeded)
     }
   }

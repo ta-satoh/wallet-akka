@@ -7,7 +7,13 @@ import monocle.Iso
 import wallet.adaptor.json.MoneyJson
 import wallet.adaptor.untyped.WalletProtocol.WalletRequested
 
-final case class WalletRequestedJson(requestId: String, walletId: String, money: MoneyJson, occurredAt: Long)
+final case class WalletRequestedJson(
+    requestId: String,
+    walletId: String,
+    toWalletId: String,
+    money: MoneyJson,
+    occurredAt: Long
+)
 
 object WalletRequestedJson {
 
@@ -17,6 +23,7 @@ object WalletRequestedJson {
     WalletRequestedJson(
       requestId = event.requestId.toString,
       walletId = event.walletId.toString,
+      toWalletId = event.toWalletId.toString,
       money = moneyJsonIso.get(event.money),
       occurredAt = event.occurredAt.toEpochMilli
     )
@@ -24,6 +31,7 @@ object WalletRequestedJson {
     WalletRequested(
       requestId = ULID.parseULID(json.requestId),
       walletId = ULID.parseULID(json.walletId),
+      toWalletId = ULID.parseULID(json.toWalletId),
       money = moneyJsonIso.reverseGet(json.money),
       occurredAt = Instant.ofEpochMilli(json.occurredAt)
     )

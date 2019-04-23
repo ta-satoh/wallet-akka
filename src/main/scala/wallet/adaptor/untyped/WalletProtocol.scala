@@ -45,6 +45,7 @@ object WalletProtocol {
   case class PayRequest(
       id: CommandId,
       walletId: WalletId,
+      toWalletId: WalletId,
       money: Money,
       requestId: Option[RequestId],
       createdAt: Instant
@@ -56,12 +57,23 @@ object WalletProtocol {
 
   case class PayFailed(message: String) extends PayResponse
 
-  case class WalletPayed(walletId: WalletId, money: Money, requestId: Option[RequestId], occurredAt: Instant)
-      extends Event
+  case class WalletPayed(
+      walletId: WalletId,
+      toWalletId: WalletId,
+      money: Money,
+      requestId: Option[RequestId],
+      occurredAt: Instant
+  ) extends Event
 
   // 請求
-  case class RequestRequest(id: CommandId, requestId: RequestId, walletId: WalletId, money: Money, createdAt: Instant)
-      extends CommandRequest
+  case class RequestRequest(
+      id: CommandId,
+      requestId: RequestId,
+      walletId: WalletId,
+      toWalletId: WalletId,
+      money: Money,
+      createdAt: Instant
+  ) extends CommandRequest
 
   sealed trait RequestResponse extends CommandResponse
 
@@ -69,7 +81,13 @@ object WalletProtocol {
 
   case class RequestFailed(message: String) extends RequestResponse
 
-  case class WalletRequested(requestId: RequestId, walletId: WalletId, money: Money, occurredAt: Instant) extends Event
+  case class WalletRequested(
+      requestId: RequestId,
+      walletId: WalletId,
+      toWalletId: WalletId,
+      money: Money,
+      occurredAt: Instant
+  ) extends Event
 
   // 残高確認
   case class GetBalanceRequest(id: CommandId, walletId: WalletId) extends CommandRequest
